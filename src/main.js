@@ -1,33 +1,65 @@
-import './fonts/ys-display/fonts.css'
-import './style.css'
+import "./fonts/ys-display/fonts.css";
+import "./style.css";
 
-import {data as sourceData} from "./data/dataset_1.js";
-
-import {initData} from "./data.js";
-import {processFormData} from "./lib/utils.js";
-
-import {initTable} from "./components/table.js";
-// @todo: подключение
-
-
+import { data as sourceData } from "./data/dataset_1.js";
+import { initData } from "./data.js";
+import { processFormData } from "./lib/utils.js";
+import { initTable } from "./components/table.js";
+import { initPagination } from "./components/pagination.js"; // Импорт ПЕРЕД использованием
+import { initSorting } from "./components/sorting.js";
+import { initFiltering } from "./components/filtering.js";
 // Исходные данные используемые в render()
-const {data, ...indexes} = initData(sourceData);
+const { data, ...indexes } = initData(sourceData);
+
+// Инициализация таблицы
+const sampleTable = initTable(
+  {
+    tableTemplate: "#table",
+    rowTemplate: "#row",
+    before: ["header", "filter"],
+    after: ["pagination"],
+  },
+  render
+);
+
+// Инициализация фильтрации
+const applyFiltering = initFiltering(sampleTable.filter.elements, {
+  searchBySeller: indexes.sellers, // передаём массив продавцов из индексов
+});
+
+// Инициализация сортировки
+const applySorting = initSorting([
+  sampleTable.header.elements.sortByDate, // кнопка сортировки по дате
+  sampleTable.header.elements.sortByTotal, // кнопка сортировки по сумме
+]);
+
+// Инициализация пагинации
+const applyPagination = initPagination(
+  sampleTable.pagination.elements,
+  (el, page, isCurrent) => {
+    const input = el.querySelector("input");
+    const label = el.querySelector("span");
+    input.value = page;
+    input.checked = isCurrent;
+    label.textContent = page;
+    return el;
+  }
+);
 
 /**
  * Сбор и обработка полей из таблицы
  * @returns {Object}
  */
 function collectState() {
-    const state = processFormData(new FormData(sampleTable.container));
-const rowsPerPage = parseInt(state.rowsPerPage);    // приведём количество страниц к числу
-const page = parseInt(state.page ?? 1);                // номер страницы по умолчанию 1 и тоже число
+  const state = processFormData(new FormData(sampleTable.container));
+  const rowsPerPage = parseInt(state.rowsPerPage);
+  const page = parseInt(state.page ?? 1);
 
-return {                                            // расширьте существующий return вот так
+  return {
     ...state,
     rowsPerPage,
-    page
-};
-  
+    page,
+  };
 }
 
 /**
@@ -35,35 +67,16 @@ return {                                            // расширьте сущ
  * @param {HTMLButtonElement?} action
  */
 function render(action) {
-    let state = collectState(); // состояние полей из таблицы
-    let result = [...data]; // копируем для последующего изменения
-    // @todo: использование
-result = applyPagination(result, state, action);
+  let state = collectState();
+  let result = [...data];
 
-    sampleTable.render(result)
+  result = applyFiltering(result, state, action);
+  result = applySorting(result, state, action);
+  result = applyPagination(result, state, action);
+  sampleTable.render(result);
 }
 
-const sampleTable = initTable({
-    tableTemplate: '#table-template',
-    rowTemplate: '#row-template',
-    before: [],
-    after: ['pagination']
-}, render);
-import { initPagination } from './components/pagination.js';
-// @todo: инициализация
-const applyPagination = initPagination(
-    sampleTable.pagination.elements,             // передаём сюда элементы пагинации, найденные в шаблоне
-    (el, page, isCurrent) => {                    // и колбэк, чтобы заполнять кнопки страниц данными
-        const input = el.querySelector('input');
-        const label = el.querySelector('span');
-        input.value = page;
-        input.checked = isCurrent;
-        label.textContent = page;
-        return el;
-    }
-);
-
-const appRoot = document.querySelector('#app');
+const appRoot = document.querySelector("#app");
 appRoot.appendChild(sampleTable.container);
 
 render();

@@ -13,16 +13,16 @@ export function initTable(settings, onAction) {
 
   // @todo: #1.2 —  вывести дополнительные шаблоны до и после таблицы
   if (Array.isArray(before)) {
-    before.reverse().forEach(subName => {
+    before.reverse().forEach((subName) => {
       // ctrl c шаблона и в root
-      root[subName] = cloneTemplate(subName);            // клонируем и получаем объект, сохраняем в таблице
-      root.container.prepend(root[subName].container);   // добавляем к таблице ДО (prepend) - исправил на prepend!
+      root[subName] = cloneTemplate(subName); // клонируем и получаем объект, сохраняем в таблице
+      root.container.prepend(root[subName].container); // добавляем к таблице ДО (prepend) - исправил на prepend!
     });
   }
 
   // Добавляем шаблоны ПОСЛЕ таблицы
   if (Array.isArray(after)) {
-    after.forEach(subName => {
+    after.forEach((subName) => {
       // Клонируем шаблон и сохраняем в root для доступа позже
       root[subName] = cloneTemplate(subName);
       // Добавляем после таблицы (в конец контейнера)
@@ -32,19 +32,19 @@ export function initTable(settings, onAction) {
 
   // @todo: #1.3 —  обработать события и вызвать onAction()
   //   изменение полей
-  root.container.addEventListener('change', () => {
+  root.container.addEventListener("change", () => {
     // Просто вызываем onAction без аргументов
     onAction();
   });
-  
+
   // Обработчик события reset (сброс формы)
-  root.container.addEventListener('reset', () => {
+  root.container.addEventListener("reset", () => {
     // Используем setTimeout для задержки, потому что reset срабатывает быстрее очистки полей
     setTimeout(onAction);
   });
 
   // Обработчик события submit (отправка формы)
-  root.container.addEventListener('submit', (e) => {
+  root.container.addEventListener("submit", (e) => {
     // Предотвращаем стандартное поведение (перезагрузку страницы)
     e.preventDefault();
     // Вызываем onAction с кнопкой, которая вызвала submit
@@ -56,22 +56,23 @@ export function initTable(settings, onAction) {
     const nextRows = data.map((item) => {
       // 1. клонируем шаблон
       const row = cloneTemplate(rowTemplate);
-      
+
       // 2. Перебираем все ключи (поля) данных текущей строки
-      Object.keys(item).forEach(key => {
+      Object.keys(item).forEach((key) => {
         // 3. Проверяем, существует ли элемент с таким именем в шаблоне
         if (row.elements[key]) {
           // 4. Присваиваем значение из данных в текстовое содержимое элемента
           row.elements[key].textContent = item[key];
         }
       });
-      
+
       // 5. Возвращаем контейнер строки
       return row.container;
     });
-    
+
     // 6. добавление новых строк
-    root.elements.tbody.innerHTML = ''; // Очищаем старые строки
+    const rowsContainer = root.elements.rows;
+    root.elements.tbody.innerHTML = ""; // Очищаем старые строки
     root.elements.tbody.append(...nextRows); // Добавляем новые строки
   };
 
