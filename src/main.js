@@ -4,14 +4,18 @@ import "./style.css";
 import { data as sourceData } from "./data/dataset_1.js";
 import { initData } from "./data.js";
 import { processFormData } from "./lib/utils.js";
+
+// Импорт модулей таблицы
 import { initTable } from "./components/table.js";
 import { initPagination } from "./components/pagination.js";
 import { initSorting } from "./components/sorting.js";
 import { initFiltering } from "./components/filtering.js";
 import { initSearching } from "./components/searching.js";
 
+// Исходные данные используемые в render()
 const { data, ...indexes } = initData(sourceData);
 
+// @todo: инициализация таблицы
 const sampleTable = initTable(
   {
     tableTemplate: "#table",
@@ -22,14 +26,21 @@ const sampleTable = initTable(
   render
 );
 
+// @todo: инициализация поиска
 const applySearching = initSearching("search");
+
+// @todo: инициализация фильтрации
 const applyFiltering = initFiltering(sampleTable.filter.elements, {
   searchBySeller: indexes.sellers,
 });
+
+// @todo: инициализация сортировки
 const applySorting = initSorting([
   sampleTable.header.elements.sortByDate,
   sampleTable.header.elements.sortByTotal,
 ]);
+
+// @todo: инициализация пагинации
 const applyPagination = initPagination(
   sampleTable.pagination.elements,
   (el, page, isCurrent) => {
@@ -42,6 +53,10 @@ const applyPagination = initPagination(
   }
 );
 
+/**
+ * Сбор и обработка полей из таблицы
+ * @returns {Object}
+ */
 function collectState() {
   const state = processFormData(new FormData(sampleTable.container));
   const rowsPerPage = parseInt(state.rowsPerPage);
@@ -49,16 +64,24 @@ function collectState() {
   return { ...state, rowsPerPage, page };
 }
 
+/**
+ * Перерисовка состояния таблицы при любых изменениях
+ * @param {HTMLButtonElement?} action
+ */
 function render(action) {
-  let state = collectState();
-  let result = [...data];
-  result = applySearching(result, state, action);
-  result = applyFiltering(result, state, action);
-  result = applySorting(result, state, action);
-  result = applyPagination(result, state, action);
+  let state = collectState(); // состояние полей из таблицы
+  let result = [...data]; // копируем для последующего изменения
+
+  // @todo: использование модулей в правильном порядке
+  result = applySearching(result, state, action); // 1. Поиск
+  result = applyFiltering(result, state, action); // 2. Фильтрация
+  result = applySorting(result, state, action); // 3. Сортировка
+  result = applyPagination(result, state, action); // 4. Пагинация
+
   sampleTable.render(result);
 }
 
 const appRoot = document.querySelector("#app");
 appRoot.appendChild(sampleTable.container);
+
 render();
