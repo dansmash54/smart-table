@@ -1,7 +1,7 @@
 import "./fonts/ys-display/fonts.css";
 import "./style.css";
 
-import { data as sourceData } from "./data/dataset_1.js";
+// import { data as sourceData } from "./data/dataset_1.js";
 import { initData } from "./data.js";
 import { processFormData } from "./lib/utils.js";
 
@@ -13,7 +13,8 @@ import { initFiltering } from "./components/filtering.js";
 import { initSearching } from "./components/searching.js";
 
 // Исходные данные используемые в render()
-const { data, ...indexes } = initData(sourceData);
+// замена константы
+const api = initData();
 
 // @todo: инициализация таблицы
 const sampleTable = initTable(
@@ -23,16 +24,19 @@ const sampleTable = initTable(
     before: ["search", "header", "filter"],
     after: ["pagination"],
   },
-  render
+  render,
 );
 
 // @todo: инициализация поиска
 const applySearching = initSearching("search");
 
-// @todo: инициализация фильтрации
-const applyFiltering = initFiltering(sampleTable.filter.elements, {
-  searchBySeller: indexes.sellers,
-});
+// // @todo: инициализация фильтрации
+const { applyFiltering, updateIndexes } = initFiltering(
+  sampleTable.filter.elements,
+);
+//  {
+//   searchBySeller: indexes.sellers,
+// });
 
 // @todo: инициализация сортировки
 const applySorting = initSorting([
@@ -41,7 +45,7 @@ const applySorting = initSorting([
 ]);
 
 // @todo: инициализация пагинации
-const applyPagination = initPagination(
+const { applyPagination, updatePagination } = initPagination(
   sampleTable.pagination.elements,
   (el, page, isCurrent) => {
     const input = el.querySelector("input");
@@ -50,7 +54,7 @@ const applyPagination = initPagination(
     input.checked = isCurrent;
     label.textContent = page;
     return el;
-  }
+  },
 );
 
 /**
@@ -63,25 +67,35 @@ function collectState() {
   const page = parseInt(state.page ?? 1);
   return { ...state, rowsPerPage, page };
 }
-
+// добавление функции init()
+async function init() {
+  const indexes = await api.getIndexes();
+  console.log("Индексы загружены:", indexes);
+  updateIndexes({
+    searchBySeller: indexes.sellers,
+  });
+}
 /**
  * Перерисовка состояния таблицы при любых изменениях
  * @param {HTMLButtonElement?} action
  */
-function render(action) {
+async function render(action) {
+  //ассинхронная
   let state = collectState(); // состояние полей из таблицы
-  let result = [...data]; // копируем для последующего изменения
+  let query = {}; // здесь будут формироваться параметры запроса
+  // другие apply*
+  query = applySearching(query, state, action);
+  query = applyFiltering(query, state, action);
+  query = applySorting(query, state, action);
+  query = applyPagination(query, state, action); // обновляем query
 
-  // @todo: использование модулей в правильном порядке
-  result = applySearching(result, state, action); // 1. Поиск
-  result = applyFiltering(result, state, action); // 2. Фильтрация
-  result = applySorting(result, state, action); // 3. Сортировка
-  result = applyPagination(result, state, action); // 4. Пагинация
+  const { total, items } = await api.getRecords(query); // запрашиваем данные с собранными параметрами
 
-  sampleTable.render(result);
+  updatePagination(total, query); // перерисовываем пагинатор
+  sampleTable.render(items);
 }
 
 const appRoot = document.querySelector("#app");
 appRoot.appendChild(sampleTable.container);
 
-render();
+init().then(() => render());
