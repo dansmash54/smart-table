@@ -19,7 +19,6 @@ const mapRecords = (data) =>
   }));
 export function initData() {
   // функция получения индексов
-  // функция получения индексов
   const getIndexes = async () => {
     if (!sellers || !customers) {
       // если индексы ещё не установлены, то делаем запросы

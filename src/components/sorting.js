@@ -23,8 +23,8 @@ export function initSorting(columns) {
       columns.forEach((column) => {
         // Перебираем все наши кнопки сортировки
         if (column.dataset.value !== "none") {
-          // Ищем ту, что находится не в начальном состоянии (предполагаем, что одна)
-          field = column.dataset.field; // Сохраняем в переменных поле
+          // Ищем ту, что находится не в начальном состоянии
+          field = column.dataset.field; // cохраняем в переменных поле
           order = column.dataset.value; // и направление сортировки
         }
       });

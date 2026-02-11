@@ -10,50 +10,10 @@
  * в удобный объект для дальнейшего доступа к этим элементам.
  */
 export function cloneTemplate(templateId) {
-  // Удаляем символ # если он есть в начале
+  // Поиск по ID
   const id = templateId.startsWith("#") ? templateId.slice(1) : templateId;
-
   // Находим шаблон в документе по его ID
   const template = document.getElementById(id);
-
-  // Проверяем, найден ли шаблон
-  if (!template) {
-    console.error(
-      `❌ Template not found: ${templateId} (searched for id: "${id}")`,
-    );
-    console.log(
-      "📋 All available templates in document:",
-      Array.from(document.querySelectorAll("template")).map((t) => t.id),
-    );
-    console.log(
-      "📋 All elements with ID:",
-      Array.from(document.querySelectorAll("[id]")).map((el) => el.id),
-    );
-
-    throw new Error(`Template "${templateId}" not found in document`);
-  }
-
-  // Проверяем, что это действительно <template> элемент
-  if (template.tagName !== "TEMPLATE") {
-    console.error(
-      `❌ Element with id "${id}" is not a <template> tag, it's a <${template.tagName.toLowerCase()}>`,
-    );
-    throw new Error(`Element with id "${id}" is not a template`);
-  }
-
-  // Проверяем, что template имеет content
-  if (!template.content) {
-    console.error(`❌ Template "${id}" has no content`);
-    throw new Error(`Template "${id}" has no content`);
-  }
-
-  // Проверяем, что в template.content есть элементы
-  if (!template.content.firstElementChild) {
-    console.error(`❌ Template "${id}" is empty (no child elements)`);
-    throw new Error(`Template "${id}" is empty`);
-  }
-
-  console.log(`✅ Template found: "${id}", cloning...`);
 
   // Клонируем первый дочерний элемент шаблона вместе со всеми его потомками
   const clone = template.content.firstElementChild.cloneNode(true);
@@ -66,10 +26,6 @@ export function cloneTemplate(templateId) {
       return acc;
     },
     {},
-  );
-
-  console.log(
-    `✅ Template "${id}" cloned, found ${Object.keys(elements).length} elements with data-name`,
   );
 
   // Возвращаем объект с контейнером (клоном шаблона) и именованными элементами

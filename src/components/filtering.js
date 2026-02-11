@@ -10,7 +10,7 @@ export function initFiltering(elements) {
             el.textContent = name;
             el.value = name;
             return el;
-          })
+          }),
         );
       }
     });
@@ -32,19 +32,24 @@ export function initFiltering(elements) {
 
     // @todo: #4.5 — формируем параметры фильтрации для сервера
     const filter = {};
-    Object.keys(elements).forEach(key => {
+    Object.keys(elements).forEach((key) => {
       if (elements[key]) {
-        if (['INPUT', 'SELECT'].includes(elements[key].tagName) && elements[key].value) {
+        if (
+          ["INPUT", "SELECT"].includes(elements[key].tagName) &&
+          elements[key].value
+        ) {
           filter[`filter[${elements[key].name}]`] = elements[key].value;
         }
       }
     });
 
-    return Object.keys(filter).length ? Object.assign({}, query, filter) : query;
+    return Object.keys(filter).length
+      ? Object.assign({}, query, filter)
+      : query;
   };
 
   return {
     updateIndexes,
-    applyFiltering
+    applyFiltering,
   };
 }

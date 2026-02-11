@@ -2,12 +2,12 @@ import { getPages } from "../lib/utils.js";
 
 export const initPagination = (
   { pages, fromRow, toRow, totalRows },
-  createPage
+  createPage,
 ) => {
   // @todo: #2.3 — подготовить шаблон кнопки для страницы и очистить контейнер
   const pageTemplate = pages.firstElementChild.cloneNode(true);
   pages.firstElementChild.remove();
-  
+
   let pageCount;
 
   const applyPagination = (query, state, action) => {
@@ -34,7 +34,7 @@ export const initPagination = (
 
     return Object.assign({}, query, {
       limit,
-      page
+      page,
     });
   };
 
@@ -48,7 +48,7 @@ export const initPagination = (
       ...visiblePages.map((pageNumber) => {
         const el = pageTemplate.cloneNode(true);
         return createPage(el, pageNumber, pageNumber === page);
-      })
+      }),
     );
 
     // @todo: #2.5 — обновить статус пагинации
@@ -59,6 +59,6 @@ export const initPagination = (
 
   return {
     applyPagination,
-    updatePagination
+    updatePagination,
   };
 };
